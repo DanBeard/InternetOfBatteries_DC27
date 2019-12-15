@@ -224,9 +224,9 @@ void loop() {
     }
   }
     
-  // print sensor data every 3 seconds
+  // print sensor data every N seconds
   unsigned long CurTime = esp_timer_get_time();
-  if(((CurTime - LastSensorPrintTime) / 1000000ULL) >= 3) {
+  if(((CurTime - LastSensorPrintTime) / 1000000ULL) >= 10) {
     LastSensorPrintTime = CurTime;
     Battery->print_sensor_data();
   }
@@ -245,7 +245,7 @@ void loop() {
   //if ACTION button double pressed then swap the captive portal otherwise swap led options
   if(DoublePress_ACT && (CurTime - LastButtonPressTime) > 500000ULL)
   {
-    if(BatteryWifi)
+    /*if(BatteryWifi)
     {
       delete BatteryWifi;
       BatteryWifi = 0;
@@ -254,15 +254,28 @@ void loop() {
       Prefs->begin("options");
       Prefs->putBool("wifi", false);
       Prefs->end();
+    }*/
+    Serial.printf("Button pushed: %d\n", DoublePress_ACT);
+    if(DoublePress_ACT == 1)
+    {
+      Serial.print("Let's set this BOI up!\n");
+      BatteryWifi->switchMode(boi_wifi::NormalMode);
     }
     else if(DoublePress_ACT == 2)
     {
-      BatteryWifi = new boi_wifi(Battery, MessageHandler, boi_wifi::BusinessCardMode);
+      Serial.print("HAHA BUSINESS!!!!\n");
+      BatteryWifi->switchMode(boi_wifi::BusinessCardMode);
+      //BatteryWifi = new boi_wifi(Battery, MessageHandler, boi_wifi::BusinessCardMode);
     }
-    else
+    else if(DoublePress_ACT == 3)
     {
-      BatteryWifi = new boi_wifi(Battery, MessageHandler, boi_wifi::NormalMode);
+      Serial.print("LOOK AT ME MORTY, I'M BATTERY RIIIIIIIIIICK!!!!\n");
+      BatteryWifi->switchMode(boi_wifi::RickMode);
     }
+    //else
+    //{
+    //  BatteryWifi = new boi_wifi(Battery, MessageHandler, boi_wifi::NormalMode);
+    //}
     LastButtonPressTime = 0;
     DoublePress_ACT = 0;
   }

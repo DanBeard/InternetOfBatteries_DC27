@@ -184,15 +184,23 @@ void boi_wifi::monitor_captive_portal(){
 
 void boi_wifi::Reconfigure(const OptionsStruct *Options)
 {
-    char WifiName[20 + 1 + 10];
+    char WifiName[20 + 1 + 20];
     uint8_t BatterySymbol[] = " \xF0\x9F\x94\x8B ";
+    uint8_t LockSymbol[] = " \xf0\x9f\x94\x92 ";
 
     memcpy(WifiName, &BatterySymbol[1], 5);
 
     //reconfigure the wifi with batteries around it
     memcpy(&WifiName[5], Options->WifiName, strlen(Options->WifiName));
-    memcpy(&WifiName[5 + strlen(Options->WifiName)], BatterySymbol, 5);
-    WifiName[10 + strlen(Options->WifiName)] = 0;
+    int lastChar = 5 + strlen(Options->WifiName); // position of last char so we can put a battery after it
+    // add a lock if there is a wifi password (this way we have a differnt SSID for the settings page vs public pages)
+    if(Options->WifiPassword[0] != 0) 
+    {
+        memcpy(&WifiName[lastChar], &LockSymbol[1] , 5);
+        lastChar+=5;
+    }
+    memcpy(&WifiName[lastChar], BatterySymbol, 5);
+    WifiName[lastChar+5] = 0;
     Serial.printf("Wifi portal name: %s\n", WifiName);
 
     if(!WiFi.softAP(WifiName, Options->WifiPassword))
@@ -247,6 +255,17 @@ void boi_wifi::setup_captive_portal(const OptionsStruct *Options){
     }
 }
 
+// switch between wifi modes after everything has initialized
+void boi_wifi::switchMode(WifiModeEnum mode)
+{
+    Mode = mode;
+    
+
+    this->preferences.begin("options");
+    this->preferences.putUChar("wifi", Mode);
+    this->preferences.end();
+    ESP.restart(); //graceful restart
+}
 void boi_wifi::ActivateBusinessCard()
 {
     const OptionsStruct *Options;

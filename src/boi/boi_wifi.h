@@ -28,7 +28,8 @@ public:
         NormalMode = 1,
         BusinessCardMode = 2,
         RickMode = 3,
-        PartyMode = 4
+        PartyMode = 4,
+        LAST_MODE = PartyMode
     } WifiModeEnum;
 
     boi_wifi(boi *boiData, Messages *message_handler, WifiModeEnum NewMode);
@@ -37,6 +38,7 @@ public:
     void handleRoot();
     void monitor_captive_portal();
     void RefreshSettings();
+    void switchMode(WifiModeEnum mode);
 
     private:
         boi *_boi;
